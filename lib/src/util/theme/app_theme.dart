@@ -7,7 +7,7 @@ class AppTheme {
     primaryColor: Color(0xFF6A5ACD),
 
     colorScheme: ColorScheme.light(
-      primary: Color(0xFF6A5ACD),
+      primary: Color(0xFF6BBFFF),
       secondary: Color(0xFFFF6B6B),
       surface: Color(0xFFF5F5F5),
       onPrimary: Colors.white,
