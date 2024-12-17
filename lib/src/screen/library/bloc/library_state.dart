@@ -9,8 +9,12 @@ final class LibraryInitial extends LibraryState {}
 
 final class LibraryLoadingState extends LibraryActionsState {}
 
+final class LibraryNoPermissionState extends LibraryActionsState {
+  final String message;
+  LibraryNoPermissionState({required this.message});
+}
 final class LibraryLoadedState extends LibraryActionsState {
-  final List<SongModel> music;
+  final List<File> music;
   LibraryLoadedState({required this.music});
 }
 

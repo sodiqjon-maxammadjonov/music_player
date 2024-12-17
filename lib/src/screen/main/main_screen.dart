@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../library/library_screen.dart';
 import 'bloc/main_screen_bloc.dart';
 
 class MainScreen extends StatefulWidget {
@@ -44,7 +45,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     );
                   }
                 } else if (details.primaryVelocity! < 0) {
-                  // Swipe Left (Go to Next Page)
                   if (pageController.page! < 2) {
                     pageController.nextPage(
                       duration: Duration(milliseconds: 300),
@@ -176,23 +176,6 @@ class HomeScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class LibraryScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Music Library', style: Theme.of(context).textTheme.displayMedium),
-      ),
-      body: Center(
-        child: Text(
-          'Your Music Library',
-          style: Theme.of(context).textTheme.displayLarge,
         ),
       ),
     );

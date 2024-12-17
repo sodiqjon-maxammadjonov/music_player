@@ -31,16 +31,12 @@ class SplashScreenStates extends State<SplashScreen> with SingleTickerProviderSt
         bloc: bloc,
         listenWhen: (previous, current) => current is SplashScreenActionState,
         buildWhen: (previous, current) {
-          print("previous: $previous, current: $current");
           return current is! SplashScreenActionState;
         },
 
         listener: (context, state) {
-          print("Current State in Listener: $state");
           if (state is SplashScreenInitial) {
-            print("SplashScreenInitial holat ishlamoqda.");
           } else if (state is SplashScreenSuccessState) {
-            print("State is SplashScreenSuccessState: Navigating to main");
             Navigator.pushReplacementNamed(context, RouteNames.main);
           }
           else {
@@ -48,7 +44,6 @@ class SplashScreenStates extends State<SplashScreen> with SingleTickerProviderSt
           }
         },
         builder: (context, state) {
-          print("Current State in Builder: $state");
           return Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -119,7 +114,6 @@ class SplashScreenStates extends State<SplashScreen> with SingleTickerProviderSt
       ),
     );
   }
-
   @override
   void dispose() {
     _controller.dispose();
