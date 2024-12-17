@@ -12,6 +12,7 @@ class AppTheme {
       surface: Color(0xFFF5F5F5),
       onPrimary: Colors.white,
       onSecondary: Colors.black,
+      error: Colors.red,
     ),
 
     appBarTheme: AppBarTheme(
