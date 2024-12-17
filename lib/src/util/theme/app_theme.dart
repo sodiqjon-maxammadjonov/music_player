@@ -59,12 +59,13 @@ class AppTheme {
     scaffoldBackgroundColor: Color(0xFF121212),
 
     colorScheme: ColorScheme.dark(
-      primary: Color(0xFF8A4FFF),
-      secondary: Color(0xFFFF6B6B),
+      primary: Color(0xFF003366),
+      secondary: Color(0xFFC0392B),
       background: Color(0xFF121212),
       surface: Color(0xFF1E1E1E),
       onPrimary: Colors.white,
       onSecondary: Colors.white,
+      error: Color(0xFFB71C1C)
     ),
 
     appBarTheme: AppBarTheme(

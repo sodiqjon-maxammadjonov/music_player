@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:music_player/src/route/routes.dart';
-import 'package:music_player/src/screen/splash/splash_screen.dart';
 import 'package:music_player/src/util/theme/app_theme.dart';
 
 void main() {
@@ -16,7 +15,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.light,
+      themeMode: ThemeMode.system,
       routes: Routes.baseRoutes,
       initialRoute: RouteNames.splash,
       // home: SplashScreen(),

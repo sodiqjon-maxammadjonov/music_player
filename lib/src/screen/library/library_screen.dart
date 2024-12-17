@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:music_player/src/screen/library/bloc/library_bloc.dart';
+import 'package:music_player/src/screen/procces/error.dart';
 import 'package:music_player/src/screen/procces/loading.dart';
 import '../../util/snacbar/scaffold_messanger.dart';
 
@@ -12,10 +13,16 @@ class LibraryScreen extends StatefulWidget {
 }
 
 class _LibraryScreenState extends State<LibraryScreen> {
+  final bloc = LibraryBloc();
+  @override
+  void initState() {
+    super.initState();
+    bloc.add(LibraryLoadEvent());
+  }
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => LibraryBloc()..add(LibraryLoadEvent()),
+      create: (context) => bloc..add(LibraryLoadEvent()),
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -24,6 +31,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
         ),
         body: BlocConsumer<LibraryBloc, LibraryState>(
+          bloc: bloc,
           listenWhen: (previous, current) => current is LibraryActionsState,
           buildWhen: (previous, current) => current is! LibraryActionsState,
           listener: (context, state) {
@@ -49,9 +57,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
           },
           builder: (context, state) {
             if (state is LibraryLoadingState) {
-              return const Loading(); // Loading widget to show while fetching data
+              return const Loading();
             } else if (state is LibraryLoadedState) {
-              // Replace this with the widget to show when music data is loaded
               return ListView.builder(
                 itemCount: state.music.length,
                 itemBuilder: (context, index) {
@@ -64,7 +71,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             } else if (state is LibraryEmptyState) {
               return Center(child: Text('No music found.'));
             } else {
-              return const Center(child: Text('Something went wrong.'));
+              return const CustomError();
             }
           },
         ),

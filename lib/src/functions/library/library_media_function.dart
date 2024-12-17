@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:music_player/src/util/constants/const_value.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../screen/library/bloc/library_bloc.dart';
 
@@ -8,7 +9,6 @@ class LibraryMediaFunction {
   LibraryMediaFunction({required this.emit});
 
   Future<void> fetchMusicFromStorage() async {
-    // Ruxsat so'rash
     print("Ruxsat so'ralmoqda...");
     var status = await Permission.storage.request();
     print("Ruxsat holati: $status");
@@ -16,7 +16,7 @@ class LibraryMediaFunction {
     if (!status.isGranted) {
       print("Xatolik: Ruxsat berilmagan!");
       emit?.call(LibraryNoPermissionState(
-        message: "Xotiraga kirish ruxsati yo'q",
+        message: ConstValue.noPermission,
       ));
       return;
     }
@@ -50,8 +50,7 @@ class LibraryMediaFunction {
         if (entity is File) {
           String extension = entity.path.split('.').last.toLowerCase();
           print("Topilgan fayl: ${entity.path} (Extension: $extension)");
-
-          if (extension == 'mp3' || extension == 'wav') {
+          if (extension == 'mp3' || extension == 'wav' || extension == 'm4a' || extension == 'flac') {
             print("Qo'shildi: ${entity.path}");
             musicFiles.add(entity);
           }
