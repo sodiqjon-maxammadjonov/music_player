@@ -1,9 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:music_player/src/screen/library/bloc/library_bloc.dart';
-import 'package:music_player/src/screen/procces/error.dart';
-import 'package:music_player/src/screen/procces/loading.dart';
+
 import '../../util/snacbar/scaffold_messanger.dart';
+import '../procces/error.dart';
+import '../procces/loading.dart';
+import 'bloc/library_bloc.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -13,16 +15,18 @@ class LibraryScreen extends StatefulWidget {
 }
 
 class _LibraryScreenState extends State<LibraryScreen> {
-  final bloc = LibraryBloc();
+  late final LibraryBloc bloc;
+
   @override
   void initState() {
     super.initState();
-    bloc.add(LibraryLoadEvent());
+    bloc = LibraryBloc()..add(LibraryLoadEvent());
   }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => bloc..add(LibraryLoadEvent()),
+      create: (context) => bloc,
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -31,25 +35,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
         ),
         body: BlocConsumer<LibraryBloc, LibraryState>(
-          bloc: bloc,
-          listenWhen: (previous, current) => current is LibraryActionsState,
-          buildWhen: (previous, current) => current is! LibraryActionsState,
+          // listenWhen: (previous, current) => current is LibraryState,
+          // buildWhen: (previous, current) => current is! LibraryState,
           listener: (context, state) {
-            if (state is LibraryErrorState) {
+            if (state is LibraryErrorState ||
+                state is LibraryNoPermissionState) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (context.mounted) {
                   ScaffoldMessengerUtil.showErrorSnackBar(
                     context,
-                    state.message,
-                  );
-                }
-              });
-            } else if (state is LibraryNoPermissionState) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (context.mounted) {
-                  ScaffoldMessengerUtil.showErrorSnackBar(
-                    context,
-                    state.message,
+                    'state.message',
                   );
                 }
               });
@@ -64,14 +59,18 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 itemBuilder: (context, index) {
                   final music = state.music[index];
                   return ListTile(
-                    title: Text(music.toString()),
+                    title: Text(music.uri.pathSegments.last),
+                    subtitle: Text(music.path),
                   );
                 },
               );
             } else if (state is LibraryEmptyState) {
               return Center(child: Text('No music found.'));
-            } else {
+            } else if (state is LibraryErrorState) {
               return const CustomError();
+            }  else {
+              print('[WARNING]: Unknown state encountered: $state');
+              return SizedBox();
             }
           },
         ),

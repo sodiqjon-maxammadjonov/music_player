@@ -15,6 +15,6 @@ class LibraryBloc extends Bloc<LibraryEvent, LibraryState> {
 
   FutureOr<void> libraryLoadEvent(
       LibraryLoadEvent event, Emitter<LibraryState> emit) async {
-    await LibraryMediaFunction(emit: emit.call).fetchMusicFromStorage();
+    await LibraryMediaFunction(emit: emit.call).loadMusicFiles();
   }
 }

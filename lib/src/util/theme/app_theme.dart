@@ -4,7 +4,6 @@ class AppTheme {
   static final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
     primaryColor: Color(0xFF6A5ACD),
-
     colorScheme: ColorScheme.light(
       primary: Color(0xFF6BBFFF),
       secondary: Color(0xFFFF6B6B),
@@ -13,7 +12,6 @@ class AppTheme {
       onSecondary: Colors.black,
       error: Colors.red,
     ),
-
     appBarTheme: AppBarTheme(
       backgroundColor: Color(0xFFF5F5F5),
       foregroundColor: Color(0xFF2C3E50),
@@ -25,7 +23,6 @@ class AppTheme {
         fontWeight: FontWeight.bold,
       ),
     ),
-
     textTheme: TextTheme(
       displayLarge: TextStyle(
         color: Color(0xFF2C3E50),
@@ -101,7 +98,6 @@ class AppTheme {
       thumbColor: Color(0xFF8A4FFF),
       overlayColor: Color(0xFF8A4FFF).withValues(alpha: 0.3, red: 138, green: 79, blue: 255),
     ),
-
     iconTheme: IconThemeData(
       color: Colors.white,
     ),

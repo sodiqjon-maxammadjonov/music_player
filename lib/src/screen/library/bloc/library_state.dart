@@ -9,18 +9,18 @@ final class LibraryInitial extends LibraryState {}
 
 final class LibraryLoadingState extends LibraryActionsState {}
 
-final class LibraryNoPermissionState extends LibraryActionsState {
+final class LibraryNoPermissionState extends LibraryState {
   final String message;
   LibraryNoPermissionState({required this.message});
 }
-final class LibraryLoadedState extends LibraryActionsState {
+final class LibraryLoadedState extends LibraryState {
   final List<File> music;
   LibraryLoadedState({required this.music});
 }
 
-final class LibraryEmptyState extends LibraryActionsState {}
+final class LibraryEmptyState extends LibraryState {}
 
-final class LibraryErrorState extends LibraryActionsState {
+final class LibraryErrorState extends LibraryState {
   final String message;
   LibraryErrorState({required this.message});
 }
