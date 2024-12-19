@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:music_player/src/screen/library/util/music_list.dart';
 
 import '../../util/snacbar/scaffold_messanger.dart';
 import '../procces/error.dart';
@@ -54,16 +55,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             if (state is LibraryLoadingState) {
               return const Loading();
             } else if (state is LibraryLoadedState) {
-              return ListView.builder(
-                itemCount: state.music.length,
-                itemBuilder: (context, index) {
-                  final music = state.music[index];
-                  return ListTile(
-                    title: Text(music.uri.pathSegments.last),
-                    subtitle: Text(music.path),
-                  );
-                },
-              );
+              return MusicList(music: state.music);
             } else if (state is LibraryEmptyState) {
               return Center(child: Text('No music found.'));
             } else if (state is LibraryErrorState) {
