@@ -44,7 +44,6 @@ class AppTheme {
       thumbColor: Color(0xFF6A5ACD),
       overlayColor: Color(0xFF6A5ACD).withValues(alpha: 51, red: 106, green: 90, blue: 205),
     ),
-
     iconTheme: IconThemeData(
       color: Color(0xFF2C3E50),
     ),
