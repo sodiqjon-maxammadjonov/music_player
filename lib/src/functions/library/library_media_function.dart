@@ -15,7 +15,6 @@ class LibraryMediaFunction {
 
       Permission storagePermission;
 
-      // Platformni aniqlash va ruxsatni tekshirish
       if (Platform.isAndroid) {
         if (await Permission.manageExternalStorage.isGranted) {
           storagePermission = Permission.manageExternalStorage;
@@ -83,7 +82,6 @@ class LibraryMediaFunction {
         for (var path in iosMusicPaths) {
           Directory musicDir = Directory(path);
           print('[INFO]: Katalog: ${musicDir.path} tekshirilmoqda.');
-
           if (musicDir.existsSync()) {
             print('[INFO]: Katalog mavjud. Fayllar skanerlash jarayoni boshlandi.');
             var foundFiles = musicDir
