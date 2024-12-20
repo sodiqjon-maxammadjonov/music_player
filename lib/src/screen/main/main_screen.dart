@@ -38,7 +38,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
               children: [
                 HomeScreen(),
                 LibraryScreen(),
-                Musicc(musicDirectory: '/storage/emulated/0/Music')
+                Container()
               ],
             );
           },

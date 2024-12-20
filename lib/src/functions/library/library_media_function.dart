@@ -1,13 +1,60 @@
 import 'dart:io';
 import 'package:music_player/src/model/music/music.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 import '../../screen/library/bloc/library_bloc.dart';
 
 class LibraryMediaFunction {
   final void Function(LibraryState) emit;
 
   LibraryMediaFunction({required this.emit});
-  final musicLar = [];
+
+  final OnAudioQuery _audioQuery = OnAudioQuery();
+
+  // Musiqa fayllarini yuklash
+  Future<void> loadMusicFiles() async {
+    try {
+      print("[INFO]: LibraryLoadingState emit qilindi.");
+      emit(LibraryLoadingState());
+
+      // Ruxsatlarni tekshirish...
+      Permission storagePermission;
+      if (Platform.isAndroid) {
+        if (await Permission.manageExternalStorage.isGranted) {
+          storagePermission = Permission.manageExternalStorage;
+        } else {
+          storagePermission = Permission.audio;
+        }
+      } else if (Platform.isIOS) {
+        storagePermission = Permission.mediaLibrary;
+      } else {
+        throw UnsupportedError('Platform not supported');
+      }
+
+      var permissionStatus = await storagePermission.request();
+      if (!permissionStatus.isGranted) {
+        emit(LibraryNoPermissionState(message: 'Musiqa yuklab olish uchun ruxsat berilmagan'));
+        return;
+      }
+
+      // Musiqalarni olish
+      List<SongModel> musicFiles = await _audioQuery.querySongs(
+        sortType: SongSortType.ALBUM,
+        orderType: OrderType.ASC_OR_SMALLER,
+        uriType: UriType.EXTERNAL,
+      );
+
+      if (musicFiles.isNotEmpty) {
+        emit(LibraryLoadedState(music: musicFiles, folders: []));
+      } else {
+        emit(LibraryEmptyState());
+      }
+    } catch (e) {
+      print('[ERROR]: Musiqa fayllarini yuklashda xatolik: $e');
+      emit(LibraryErrorState(message: 'Musiqa fayllarini yuklashda xatolik: $e'));
+    }
+  }
+
   Future<List<Directory>> loadMusicFolders() async {
     List<Directory> musicFolders = [];
 
@@ -80,72 +127,5 @@ class LibraryMediaFunction {
     }
 
     return musicFolders;
-  }
-
-  Future<void> loadMusicFiles() async {
-    try {
-      print("[INFO]: LibraryLoadingState emit qilindi.");
-      emit(LibraryLoadingState());
-
-      // Ruxsatlarni tekshirish...
-      Permission storagePermission;
-      if (Platform.isAndroid) {
-        if (await Permission.manageExternalStorage.isGranted) {
-          storagePermission = Permission.manageExternalStorage;
-        } else {
-          storagePermission = Permission.audio;
-        }
-      } else if (Platform.isIOS) {
-        storagePermission = Permission.mediaLibrary;
-      } else {
-        throw UnsupportedError('Platform not supported');
-      }
-
-      var permissionStatus = await storagePermission.request();
-      if (!permissionStatus.isGranted) {
-        emit(LibraryNoPermissionState(message: 'Musiqa yuklab olish uchun ruxsat berilmagan'));
-        return;
-      }
-
-      // Musiqalar va papkalarni yuklash
-      List<File> musicFiles = [];
-      List<Directory> folders = await loadMusicFolders();
-
-      if (Platform.isAndroid) {
-        List<String> androidMusicPaths = [
-          '/storage/emulated/0/Music',
-          '/storage/emulated/0/Download',
-        ];
-
-        for (var path in androidMusicPaths) {
-          Directory musicDir = Directory(path);
-          if (musicDir.existsSync()) {
-            var foundFiles = musicDir
-                .listSync(recursive: true)
-                .whereType<File>()
-                .where((file) =>
-            file.path.toLowerCase().endsWith('.mp3') ||
-                file.path.toLowerCase().endsWith('.wav') ||
-                file.path.toLowerCase().endsWith('.m4a'))
-                .toList();
-            musicFiles.addAll(foundFiles);
-          }
-        }
-      } else if (Platform.isIOS) {
-        // iOS uchun musiqa fayllarini yuklash...
-      }
-
-      musicFiles.sort((a, b) => a.path.compareTo(b.path));
-
-      if (musicFiles.isNotEmpty || folders.isNotEmpty) {
-        emit(LibraryLoadedState(music: musicFiles, folders: folders));
-      } else {
-        emit(LibraryEmptyState());
-      }
-    } catch (e) {
-      print('[ERROR]: Musiqa fayllarini yuklashda xatolik: $e');
-      emit(LibraryErrorState(message: 'Musiqa fayllarini yuklashda xatolik: $e'));
-
-    }
   }
 }

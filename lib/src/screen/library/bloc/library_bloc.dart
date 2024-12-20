@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:music_player/src/functions/library/library_media_function.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 part 'library_event.dart';
 part 'library_state.dart';
 

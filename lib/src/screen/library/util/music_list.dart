@@ -1,9 +1,9 @@
-import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:on_audio_query/on_audio_query.dart';
 
 class MusicList extends StatefulWidget {
-  final List<File> music;
+  final List<SongModel> music;
   final List<String> folders;
 
   MusicList({super.key, required this.music, required this.folders});
@@ -26,7 +26,7 @@ class _MusicListState extends State<MusicList> with SingleTickerProviderStateMix
     _audioPlayer = AudioPlayer();
     _tabController = TabController(length: 2, vsync: this);
 
-    // Musiqa davomiyligini va joriy pozitsiyani olish
+    // Duration and position listeners
     _audioPlayer.onDurationChanged.listen((duration) {
       setState(() {
         _totalDuration = duration;
@@ -52,7 +52,7 @@ class _MusicListState extends State<MusicList> with SingleTickerProviderStateMix
         _audioPlayer.resume();
       }
     } else {
-      _audioPlayer.setSource(UrlSource(widget.music[index].path));
+      _audioPlayer.setSource(UrlSource(widget.music[index].data));
       _audioPlayer.resume();
       currentPlayingIndex = index;
     }
@@ -122,12 +122,8 @@ class _MusicListState extends State<MusicList> with SingleTickerProviderStateMix
                       indicatorColor: Colors.white,
                       indicatorWeight: 3.0,
                       tabs: [
-                        Tab(
-                          text: 'Musiqalar',
-                        ),
-                        Tab(
-                          text: 'Papkalar',
-                        ),
+                        Tab(text: 'Musiqalar'),
+                        Tab(text: 'Papkalar'),
                       ],
                     ),
                   ),
@@ -143,10 +139,7 @@ class _MusicListState extends State<MusicList> with SingleTickerProviderStateMix
                     itemCount: widget.music.length,
                     itemBuilder: (context, index) {
                       return Card(
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
+                        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         elevation: 1,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(8),
@@ -157,29 +150,84 @@ class _MusicListState extends State<MusicList> with SingleTickerProviderStateMix
                               height: 50,
                               decoration: BoxDecoration(
                                 color: Colors.deepPurple.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
+                                shape: BoxShape.circle
                               ),
-                              child: Icon(
-                                currentPlayingIndex == index && _audioPlayer.state == PlayerState.playing
-                                    ? Icons.pause_circle_filled
-                                    : Icons.play_circle_filled,
-                                color: Colors.deepPurple,
-                                size: 30,
-                              ),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  AspectRatio(
+                                    aspectRatio: 1.0,
+                                    child: ClipOval(
+                                      child: QueryArtworkWidget(
+                                        id: widget.music[index].id,
+                                        type: ArtworkType.AUDIO,
+                                        keepOldArtwork: true,
+                                        artworkBorder: BorderRadius.circular(50),
+                                        artworkFit: BoxFit.cover,
+                                        artworkHeight: 50,
+                                        artworkWidth: 50,
+                                        nullArtworkWidget: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.deepPurple.withOpacity(0.1),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.music_note,
+                                            size: 30,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  // Play/Pause overlay
+                                  if (currentPlayingIndex == index)
+                                    Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: Colors.black26,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: AnimatedSwitcher(
+                                        duration: Duration(milliseconds: 200),
+                                        child: Icon(
+                                          _audioPlayer.state == PlayerState.playing
+                                              ? Icons.pause
+                                              : Icons.play_arrow,
+                                          key: ValueKey<bool>(_audioPlayer.state == PlayerState.playing),
+                                          color: Colors.white,
+                                          size: 30,
+                                        ),
+                                      ),
+                                    ),
+                                  if (currentPlayingIndex == index && _audioPlayer.state == PlayerState.playing)
+                                    Positioned(
+                                      right: 0,
+                                      bottom: 0,
+                                      child: Container(
+                                        width: 12,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              )
+
+
                             ),
                             title: Text(
-                              getFileName(widget.music[index].path),
+                              widget.music[index].displayName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             subtitle: Text(
-                              // 'Unknown Artist',
-                              widget.music[index].uri.userInfo,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
+                              widget.music[index].artist ?? "unknovn artist",
+                              style: TextStyle(fontSize: 12, color: Colors.grey),
                             ),
                             trailing: IconButton(
                               icon: Icon(Icons.more_vert),
@@ -209,16 +257,12 @@ class _MusicListState extends State<MusicList> with SingleTickerProviderStateMix
                         elevation: 2,
                         child: InkWell(
                           onTap: () {
-                            // Papka ochilganda
+                            // Folder logic
                           },
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.folder,
-                                size: 48,
-                                color: Colors.amber,
-                              ),
+                              Icon(Icons.folder, size: 48, color: Colors.amber),
                               SizedBox(height: 8),
                               Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 8),
@@ -227,9 +271,7 @@ class _MusicListState extends State<MusicList> with SingleTickerProviderStateMix
                                   maxLines: 2,
                                   textAlign: TextAlign.center,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                  ),
+                                  style: TextStyle(fontSize: 14),
                                 ),
                               ),
                             ],
@@ -247,13 +289,14 @@ class _MusicListState extends State<MusicList> with SingleTickerProviderStateMix
             title: Text(
               currentPlayingIndex == null
                   ? 'Musiqa o\'ynatilmayapti'
-                  : getFileName(widget.music[currentPlayingIndex!].path),
+                  : getFileName(widget.music[currentPlayingIndex!].data),
               style: Theme.of(context).textTheme.bodyLarge,
               maxLines: 1,
             ),
-            subtitle: Text(currentPlayingIndex == null
-                ? ''
-                : widget.music[currentPlayingIndex!].path,maxLines: 1,),
+            subtitle: Text(
+              currentPlayingIndex == null ? '' : widget.music[currentPlayingIndex!].fileExtension,
+              maxLines: 1,
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [

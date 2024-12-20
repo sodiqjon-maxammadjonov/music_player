@@ -14,7 +14,7 @@ final class LibraryNoPermissionState extends LibraryState {
   LibraryNoPermissionState({required this.message});
 }
 final class LibraryLoadedState extends LibraryState {
-  final List<File> music;
+  final List<SongModel> music;
   final List<Directory> folders;
 
   LibraryLoadedState({
