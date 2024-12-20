@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../favoruite/favoruite_screen.dart';
 import '../library/library_screen.dart';
 import 'bloc/main_screen_bloc.dart';
 
@@ -11,19 +12,16 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin {
-  late PageController pageController;
   late TabController tabController;
 
   @override
   void initState() {
     super.initState();
-    pageController = PageController(initialPage: 0);
     tabController = TabController(length: 3, vsync: this, initialIndex: 0);
   }
 
   @override
   void dispose() {
-    pageController.dispose();
     tabController.dispose();
     super.dispose();
   }
@@ -35,37 +33,13 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
       child: Scaffold(
         body: BlocBuilder<MainScreenBloc, MainScreenState>(
           builder: (context, state) {
-            return GestureDetector(
-              onHorizontalDragEnd: (details) {
-                if (details.primaryVelocity! > 0) {
-                  if (pageController.page! > 0) {
-                    pageController.previousPage(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeOut,
-                    );
-                  }
-                } else if (details.primaryVelocity! < 0) {
-                  if (pageController.page! < 2) {
-                    pageController.nextPage(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeOut,
-                    );
-                  }
-                }
-              },
-              child: PageView(
-                controller: pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                onPageChanged: (index) {
-                  context.read<MainScreenBloc>().add(MainScreenSwitchEvent(index: index));
-                  tabController.animateTo(index);
-                },
-                children: [
-                  HomeScreen(),
-                  LibraryScreen(),
-                  FavoritesScreen(),
-                ],
-              ),
+            return IndexedStack(
+              index: tabController.index,
+              children: [
+                HomeScreen(),
+                LibraryScreen(),
+                Musicc(musicDirectory: '/storage/emulated/0/Music')
+              ],
             );
           },
         ),
@@ -86,8 +60,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                 blurRadius: 10,
                 spreadRadius: 2,
               ),
-
-
             ],
           ),
           child: SafeArea(
@@ -105,21 +77,23 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                 _buildNavItem(
                   Icons.home_rounded,
                   'Home',
-                  state is MainScreenHomeState || tabController.index == 0,
+                  tabController.index == 0,
                 ),
                 _buildNavItem(
                   Icons.library_music_rounded,
                   'Library',
-                  state is MainScreenLibraryState || tabController.index == 1,
+                  tabController.index == 1,
                 ),
                 _buildNavItem(
                   Icons.favorite_rounded,
                   'Favorites',
-                  state is MainScreenFavoriteState || tabController.index == 2,
+                  tabController.index == 2,
                 ),
               ],
               onTap: (index) {
-                pageController.jumpToPage(index);
+                setState(() {
+                  tabController.index = index;
+                });
                 context.read<MainScreenBloc>().add(MainScreenSwitchEvent(index: index));
               },
             ),
@@ -149,8 +123,6 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     );
   }
 }
-
-
 
 class HomeScreen extends StatelessWidget {
   @override

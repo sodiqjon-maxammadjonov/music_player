@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:music_player/src/model/music/music.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../screen/library/bloc/library_bloc.dart';
 
@@ -6,15 +7,88 @@ class LibraryMediaFunction {
   final void Function(LibraryState) emit;
 
   LibraryMediaFunction({required this.emit});
+  final musicLar = [];
+  Future<List<Directory>> loadMusicFolders() async {
+    List<Directory> musicFolders = [];
+
+    try {
+      if (Platform.isAndroid) {
+        List<String> androidMusicPaths = [
+          '/storage/emulated/0/Music',
+          '/storage/emulated/0/Download',
+        ];
+
+        for (var path in androidMusicPaths) {
+          Directory directory = Directory(path);
+          print('[INFO]: Papka tekshirilmoqda: ${directory.path}');
+
+          if (directory.existsSync()) {
+            var subDirectories = directory
+                .listSync()
+                .whereType<Directory>()
+                .where((dir) {
+              // Faqat musiqa fayllari bor papkalarni olish
+              var files = dir
+                  .listSync()
+                  .whereType<File>()
+                  .where((file) =>
+              file.path.toLowerCase().endsWith('.mp3') ||
+                  file.path.toLowerCase().endsWith('.wav') ||
+                  file.path.toLowerCase().endsWith('.m4a'))
+                  .toList();
+              return files.isNotEmpty;
+            }).toList();
+
+            print('[INFO]: ${subDirectories.length} ta musiqa papkasi topildi: ${directory.path}');
+            musicFolders.addAll(subDirectories);
+          }
+        }
+      } else if (Platform.isIOS) {
+        List<String> iosMusicPaths = [
+          '/Users/Documents/Music',
+          '/Users/Music',
+          '/Users/Downloads'
+        ];
+
+        for (var path in iosMusicPaths) {
+          Directory directory = Directory(path);
+          if (directory.existsSync()) {
+            var subDirectories = directory
+                .listSync()
+                .whereType<Directory>()
+                .where((dir) {
+              var files = dir
+                  .listSync()
+                  .whereType<File>()
+                  .where((file) =>
+              file.path.toLowerCase().endsWith('.mp3') ||
+                  file.path.toLowerCase().endsWith('.wav') ||
+                  file.path.toLowerCase().endsWith('.m4a'))
+                  .toList();
+              return files.isNotEmpty;
+            }).toList();
+
+            musicFolders.addAll(subDirectories);
+          }
+        }
+      }
+
+      musicFolders.sort((a, b) => a.path.compareTo(b.path));
+
+    } catch (e) {
+      print('[ERROR]: Papkalarni yuklashda xatolik: $e');
+    }
+
+    return musicFolders;
+  }
 
   Future<void> loadMusicFiles() async {
     try {
       print("[INFO]: LibraryLoadingState emit qilindi.");
       emit(LibraryLoadingState());
-      print("[INFO]: LibraryLoadingState successfully emitted.");
 
+      // Ruxsatlarni tekshirish...
       Permission storagePermission;
-
       if (Platform.isAndroid) {
         if (await Permission.manageExternalStorage.isGranted) {
           storagePermission = Permission.manageExternalStorage;
@@ -27,22 +101,17 @@ class LibraryMediaFunction {
         throw UnsupportedError('Platform not supported');
       }
 
-      print("[INFO]: Ruxsat turi: ${Platform.isAndroid ? 'Android - ${storagePermission.toString()}' : 'iOS - ${storagePermission.toString()}'}");
-
       var permissionStatus = await storagePermission.request();
-      print('[INFO]: Ruxsat so\'raldi. Javob: $permissionStatus');
-
       if (!permissionStatus.isGranted) {
-        print('[ERROR]: Ruxsat berilmadi! Musiqa yuklash jarayoni to\'xtatildi.');
         emit(LibraryNoPermissionState(message: 'Musiqa yuklab olish uchun ruxsat berilmagan'));
-        print("[INFO]: LibraryNoPermissionState successfully emitted.");
         return;
       }
 
+      // Musiqalar va papkalarni yuklash
       List<File> musicFiles = [];
+      List<Directory> folders = await loadMusicFolders();
 
       if (Platform.isAndroid) {
-        print("[INFO]: Android musiqa kataloglari skanerlash jarayoni boshlandi.");
         List<String> androidMusicPaths = [
           '/storage/emulated/0/Music',
           '/storage/emulated/0/Download',
@@ -50,10 +119,7 @@ class LibraryMediaFunction {
 
         for (var path in androidMusicPaths) {
           Directory musicDir = Directory(path);
-          print('[INFO]: Katalog: ${musicDir.path} tekshirilmoqda.');
-
           if (musicDir.existsSync()) {
-            print('[INFO]: Katalog mavjud. Fayllar skanerlash jarayoni boshlandi.');
             var foundFiles = musicDir
                 .listSync(recursive: true)
                 .whereType<File>()
@@ -62,63 +128,24 @@ class LibraryMediaFunction {
                 file.path.toLowerCase().endsWith('.wav') ||
                 file.path.toLowerCase().endsWith('.m4a'))
                 .toList();
-
-            print('[INFO]: ${foundFiles.length} ta fayl topildi katalogdan: ${musicDir.path}');
             musicFiles.addAll(foundFiles);
-          } else {
-            print('[WARNING]: Katalog mavjud emas: ${musicDir.path}');
           }
         }
-
-        print('[INFO]: Android musiqa fayllari topildi: ${musicFiles.length}');
       } else if (Platform.isIOS) {
-        print("[INFO]: iOS musiqa kataloglari skanerlash jarayoni boshlandi.");
-        List<String> iosMusicPaths = [
-          '/Users/Documents/Music',
-          '/Users/Music',
-          '/Users/Downloads'
-        ];
-
-        for (var path in iosMusicPaths) {
-          Directory musicDir = Directory(path);
-          print('[INFO]: Katalog: ${musicDir.path} tekshirilmoqda.');
-          if (musicDir.existsSync()) {
-            print('[INFO]: Katalog mavjud. Fayllar skanerlash jarayoni boshlandi.');
-            var foundFiles = musicDir
-                .listSync(recursive: true)
-                .whereType<File>()
-                .where((file) =>
-            file.path.toLowerCase().endsWith('.mp3') ||
-                file.path.toLowerCase().endsWith('.wav') ||
-                file.path.toLowerCase().endsWith('.m4a'))
-                .toList();
-
-            print('[INFO]: ${foundFiles.length} ta fayl topildi katalogdan: ${musicDir.path}');
-            musicFiles.addAll(foundFiles);
-          } else {
-            print('[WARNING]: Katalog mavjud emas: ${musicDir.path}');
-          }
-        }
-
-        print('[INFO]: iOS musiqa fayllari topildi: ${musicFiles.length}');
+        // iOS uchun musiqa fayllarini yuklash...
       }
 
       musicFiles.sort((a, b) => a.path.compareTo(b.path));
 
-      if (musicFiles.isNotEmpty) {
-        await Future.delayed(const Duration(seconds: 2));
-        print('[INFO]: ${musicFiles.length} ta musiqa fayli topildi va yuklandi.');
-        emit(LibraryLoadedState(music: musicFiles));
-        print("[INFO]: LibraryLoadedState successfully emitted.");
+      if (musicFiles.isNotEmpty || folders.isNotEmpty) {
+        emit(LibraryLoadedState(music: musicFiles, folders: folders));
       } else {
-        print('[INFO]: Hech qanday musiqa fayllari topilmadi.');
         emit(LibraryEmptyState());
-        print("[INFO]: LibraryEmptyState successfully emitted.");
       }
     } catch (e) {
-      print('[ERROR]: Musiqa fayllarini yuklab olishda xatolik: $e');
-      emit(LibraryErrorState(message: 'Musiqa fayllarini yuklab olishda xatolik: $e'));
-      print("[INFO]: LibraryErrorState successfully emitted.");
+      print('[ERROR]: Musiqa fayllarini yuklashda xatolik: $e');
+      emit(LibraryErrorState(message: 'Musiqa fayllarini yuklashda xatolik: $e'));
+
     }
   }
 }

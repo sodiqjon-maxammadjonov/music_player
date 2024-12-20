@@ -15,7 +15,12 @@ final class LibraryNoPermissionState extends LibraryState {
 }
 final class LibraryLoadedState extends LibraryState {
   final List<File> music;
-  LibraryLoadedState({required this.music});
+  final List<Directory> folders;
+
+  LibraryLoadedState({
+    required this.music,
+    required this.folders,
+  });
 }
 
 final class LibraryEmptyState extends LibraryState {}
