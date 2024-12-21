@@ -17,7 +17,9 @@ class ScaffoldMessengerUtil {
         content: Text(
           message,
           style: textStyle,
+
         ),
+        behavior: SnackBarBehavior.floating,
         duration: duration,
         backgroundColor: backgroundColor,
       ),
@@ -39,6 +41,7 @@ class ScaffoldMessengerUtil {
   static void showLoadingSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        behavior: SnackBarBehavior.floating,
         content: Row(
           children: [
             const CircularProgressIndicator(),

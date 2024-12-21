@@ -11,16 +11,14 @@ class LibraryMediaFunction {
 
   final OnAudioQuery _audioQuery = OnAudioQuery();
 
-  // Musiqa fayllarini yuklash
   Future<void> loadMusicFiles() async {
     try {
       print("[INFO]: LibraryLoadingState emit qilindi.");
       emit(LibraryLoadingState());
 
-      // Ruxsatlarni tekshirish...
       Permission storagePermission;
       if (Platform.isAndroid) {
-        if (await Permission.manageExternalStorage.isGranted) {
+        if (await Permission.manageExternalStorage.isDenied) {
           storagePermission = Permission.manageExternalStorage;
         } else {
           storagePermission = Permission.audio;
@@ -37,7 +35,6 @@ class LibraryMediaFunction {
         return;
       }
 
-      // Musiqalarni olish
       List<SongModel> musicFiles = await _audioQuery.querySongs(
         sortType: SongSortType.ALBUM,
         orderType: OrderType.ASC_OR_SMALLER,
@@ -57,7 +54,6 @@ class LibraryMediaFunction {
 
   Future<List<Directory>> loadMusicFolders() async {
     List<Directory> musicFolders = [];
-
     try {
       if (Platform.isAndroid) {
         List<String> androidMusicPaths = [

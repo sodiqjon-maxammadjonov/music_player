@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:music_player/src/screen/library/util/music_list.dart';
+import 'package:music_player/src/screen/library/util/musics.dart';
 import 'package:music_player/src/screen/procces/not_found.dart';
 
 import '../../util/snacbar/scaffold_messanger.dart';
@@ -17,12 +17,13 @@ class LibraryScreen extends StatefulWidget {
 }
 
 class _LibraryScreenState extends State<LibraryScreen> {
-  late final LibraryBloc bloc;
+  LibraryBloc bloc = LibraryBloc() ;
 
   @override
   void initState() {
     super.initState();
-    bloc = LibraryBloc()..add(LibraryLoadEvent());
+    bloc = LibraryBloc()
+      ..add(LibraryLoadEvent());
   }
 
   @override
@@ -48,16 +49,18 @@ class _LibraryScreenState extends State<LibraryScreen> {
             if (state is LibraryLoadingState) {
               return const Loading();
             } else if (state is LibraryLoadedState) {
-              return MusicList(
-                music: state.music,
-                folders: state.folders.map((folder) => folder.path).toList(),
+              return BlocProvider(
+                create: (context) => LibraryBloc(),
+                child: Musics(
+                  music: state.music,
+                  folders: state.folders.map((folder) => folder.path).toList(),
+                ),
               );
-
             } else if (state is LibraryEmptyState) {
               return NotFound();
             } else if (state is LibraryErrorState) {
               return const CustomError();
-            }  else {
+            } else {
               print('[WARNING]: Unknown state encountered: $state');
               return SizedBox();
             }
