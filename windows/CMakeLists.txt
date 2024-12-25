@@ -45,7 +45,7 @@ function(APPLY_STANDARD_SETTINGS TARGET)
   target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")
 endfunction()
 
-# Flutter library and tool build rules.
+# Flutter lib and tool build rules.
 set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
 
@@ -102,7 +102,7 @@ install(CODE "
 install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
   DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
 
-# Install the AOT library on non-Debug builds only.
+# Install the AOT lib on non-Debug builds only.
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
