@@ -1,0 +1,60 @@
+music_player/
+├── lib/
+│   ├── main.dart
+│   ├── core/
+│   │   ├── constants/
+│   │   │   └── app_constants.dart         # App konstantalari
+│   │   ├── errors/
+│   │   │   └── failures.dart             # Xatoliklar klasslari
+│   │   └── utils/
+│   │       └── audio_utils.dart          # Audio bilan ishlash uchun utility funksiyalar
+│   │
+│   ├── data/
+│   │   ├── datasources/
+│   │   │   ├── local/
+│   │   │   │   └── database_helper.dart  # SQLite bilan ishlash
+│   │   │   └── audio_data_source.dart    # Audio fayllarni oqish
+│   │   ├── models/
+│   │   │   ├── audio_model.dart          # Audio model
+│   │   │   ├── playlist_model.dart       # Playlist model
+│   │   │   └── folder_model.dart         # Folder model
+│   │   └── repositories/
+│   │       ├── audio_repository_impl.dart # Audio repository implementation
+│   │       ├── playlist_repository_impl.dart # Playlist repository implementation
+│   │       └── folder_repository_impl.dart # Folder repository implementation
+│   │
+│   ├── domain/
+│   │   ├── entities/
+│   │   │   ├── audio.dart                # Audio entity
+│   │   │   ├── playlist.dart             # Playlist entity
+│   │   │   └── folder.dart               # Folder entity
+│   │   ├── repositories/
+│   │   │   ├── audio_repository.dart     # Audio repository interface
+│   │   │   ├── playlist_repository.dart     # Playlist repository interface
+│   │   │   └── folder_repository.dart     # Folder repository interface
+│   │   └── usecases/
+│   │       ├── get_all_audios.dart       # Barcha qo'shiqlarni olish
+│   │       ├── get_favorites.dart        # Sevimlilarni olish
+│   │       ├── get_playlists.dart        # Playlistlarni olish
+│   │       └── get_folders.dart          # Folderlarni olish
+│   │
+│   └── presentation/
+│       ├── bloc/
+│       │   ├── player/
+│       │   │   ├── player_bloc.dart      # Player bloc
+│       │   │   ├── player_event.dart     # Player eventlari
+│       │   │   └── player_state.dart     # Player holatlar
+│       │   └── library/
+│       │       ├── library_bloc.dart     # Library bloc
+│       │       ├── library_event.dart    # Library eventlari
+│       │       └── library_state.dart    # Library holatlar
+│       ├── pages/
+│       │   ├── home_page.dart           # Asosiy sahifa
+│       │   ├── musics_page.dart         # Musiqalar sahifasi
+│       │   ├── folders_page.dart        # Folderlar sahifasi
+│       │   ├── favorites_page.dart      # Sevimlilar sahifasi
+│       │   └── playlists_page.dart      # Playlistlar sahifasi
+│       └── widgets/
+│           ├── audio_list_item.dart     # Qoshiq elementi
+│           ├── player_controls.dart      # Player kontrollar
+│           └── playlist_card.dart       # Playlist kartochkasi

@@ -2,12 +2,12 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
+  static final DatabaseHelper _instance = DatabaseHelper.internal();
   static Database? _database;
 
   factory DatabaseHelper() => _instance;
 
-  DatabaseHelper._internal();
+  DatabaseHelper.internal();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -47,7 +47,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // playlist va audio bog'lanishi
+    // playlist va audio boglanishi
     await db.execute('''
       CREATE TABLE playlist_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
