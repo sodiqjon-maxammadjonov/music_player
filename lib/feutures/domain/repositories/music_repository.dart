@@ -6,4 +6,6 @@ abstract class MusicRepository {
   Future<void> deleteSong(String songId);
   Future<void> updateSongDetails(SongEntity song);
   Future<List<SongEntity>> getFavoriteSongs();
+  Future<void> addToPlaylist(String songId);
+  Future<void> shareSong(String path);
 }

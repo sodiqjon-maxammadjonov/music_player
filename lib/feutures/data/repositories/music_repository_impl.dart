@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:on_audio_query/on_audio_query.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/song_entity.dart';
 import '../../domain/repositories/music_repository.dart';
@@ -92,5 +93,33 @@ class MusicRepositoryImpl implements MusicRepository {
   @override
   Future<void> updateSongDetails(SongEntity song) async {
     throw UnimplementedError('Updating song details is not supported');
+  }
+  @override
+  Future<void> addToPlaylist(String songId) async {
+    try {
+      // Bu yerda playlist ga qo'shish logikasini amalga oshiring
+      // Masalan:
+      final playlistKey = 'playlist_songs';
+      final currentPlaylist = prefs.getStringList(playlistKey) ?? [];
+      if (!currentPlaylist.contains(songId)) {
+        currentPlaylist.add(songId);
+        await prefs.setStringList(playlistKey, currentPlaylist);
+      }
+    } catch (e) {
+      throw Exception('Failed to add song to playlist: $e');
+    }
+  }
+
+  @override
+  Future<void> shareSong(String path) async {
+    try {
+      final file = File(path);
+      if (!await file.exists()) {
+        throw Exception('File not found');
+      }
+      await Share.share(path, subject: 'Moderator Sodiqjon');
+    } catch (e) {
+      throw Exception('Failed to share song: $e');
+    }
   }
 }
