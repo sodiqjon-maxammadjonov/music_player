@@ -1,50 +1,73 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:music_player/core/theme/theme.dart';
-import 'package:music_player/feutures/presentation/bloc/navigation/navigation_bloc.dart';
-import 'package:on_audio_query/on_audio_query.dart';
+import 'package:music_player/src/presentation/bloc/exit/exit_bloc.dart';
+import 'package:music_player/src/presentation/bloc/music/music_bloc.dart';
+import 'package:music_player/src/presentation/bloc/navigation/navigation_bloc.dart';
+import 'package:music_player/src/presentation/bloc/settings/settings_bloc.dart';
+import 'package:music_player/src/presentation/screens/main_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'feutures/data/repositories/music_repository_impl.dart';
-import 'feutures/domain/usecases/get_all_songs_usecase.dart';
-import 'feutures/presentation/bloc/music/music_bloc.dart';
-import 'feutures/presentation/screens/main_screen.dart';
+import 'core/constants/const_values.dart';
+import 'core/theme/app_theme.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  final audioQuery = OnAudioQuery();
   final prefs = await SharedPreferences.getInstance();
-  final audioPlayer = AudioPlayer();
 
-  final repository = MusicRepositoryImpl(
-    audioQuery: audioQuery,
-    prefs: prefs,
-  );
+  runApp(MyApp(prefs: prefs));
+}
 
-  final getAllSongsUseCase = GetAllSongsUseCase(repository);
+class MyApp extends StatelessWidget {
+  final SharedPreferences prefs;
 
-  runApp(
-    MultiBlocProvider(
+  const MyApp({
+    required this.prefs,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => MusicBloc(
-            getAllSongs: getAllSongsUseCase,
-            repository: repository,
-            audioPlayer: audioPlayer,
-          )..add(LoadSongsEvent()),
+          create: (context) => SettingsBloc(prefs: prefs)..add(LoadSettings()),
         ),
-        BlocProvider(create: (context) => NavigationBloc())
+        BlocProvider(
+          create: (context) => NavigationBloc(),
+        ),
+        BlocProvider(
+          create: (context) => ExitBloc(),
+        ),
+        BlocProvider(
+          create: (context) => MusicBloc(),
+        ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        debugShowMaterialGrid: false,
-        title: 'Music Player',
-        theme: AppTheme.lightTheme(),
-        darkTheme: AppTheme.darkTheme(),
-        themeMode: ThemeMode.system,
-        home: MainScreen(),
+      child: BlocBuilder<SettingsBloc, SettingsState>(
+        builder: (context, state) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: ConstValues.appName,
+            themeMode: state.themeMode,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            locale: Locale(state.language),
+            supportedLocales: const [
+              Locale('uz'),
+              Locale('en'),
+              Locale('ru'),
+            ],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: const MainScreen(),
+          );
+        },
       ),
-    ),
-  );
+    );
+  }
 }
