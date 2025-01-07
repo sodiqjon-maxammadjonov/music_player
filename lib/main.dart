@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:music_player/src/presentation/bloc/exit/exit_bloc.dart';
+import 'package:music_player/src/presentation/bloc/library/library_bloc.dart';
 import 'package:music_player/src/presentation/bloc/music/music_bloc.dart';
 import 'package:music_player/src/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:music_player/src/presentation/bloc/settings/settings_bloc.dart';
@@ -42,6 +43,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => MusicBloc(),
+        ),
+        BlocProvider(
+          create: (context) => LibraryBloc(),
         ),
       ],
       child: BlocBuilder<SettingsBloc, SettingsState>(

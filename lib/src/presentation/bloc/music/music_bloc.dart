@@ -1,4 +1,5 @@
 // music_bloc.dart
+import 'dart:developer';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -138,9 +139,8 @@ class MusicBloc extends Bloc<MusicEvent, MusicState> {
 
   Future<void> _onDeleteSong(DeleteSong event, Emitter<MusicState> emit) async {
     try {
-      final file = File(event.song.data);
-
-      // Agar joriy qo'shiq o'chirilayotgan bo'lsa, pleyerni to'xtatish
+      final file = File(event.song.uri.toString());
+      log('${event.song.uri}');
       if (state.currentSong?.id == event.song.id) {
         await _audioPlayer.stop();
       }
