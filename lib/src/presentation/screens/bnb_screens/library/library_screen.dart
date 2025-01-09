@@ -49,54 +49,49 @@ class _LibraryScreenState extends State<LibraryScreen>
         backgroundColor: Colors.transparent,
         title: PreferredSize(
           preferredSize: const Size.fromHeight(50),
-          child: Stack(
-            children: [
-              Container(
-                height: 42,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.colorScheme.primary.withOpacity(0.1),
-                      blurRadius: 12,
-                      offset: const Offset(0, 0),
-                    ),
+          child: Container(
+            height: 42,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 0),
+                ),
+              ],
+            ),
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              onTap: _handleTabChanged,
+              dividerColor: Colors.transparent,
+              indicator: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                gradient: LinearGradient(
+                  colors: [
+                    theme.colorScheme.primary.withValues(alpha: 0.2),
+                    theme.colorScheme.secondary.withValues(alpha: 0.2),
                   ],
                 ),
               ),
-              // TabBar
-              TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                onTap: _handleTabChanged,
-                dividerColor: Colors.transparent,
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  gradient: LinearGradient(
-                    colors: [
-                      theme.colorScheme.primary.withOpacity(0.2),
-                      theme.colorScheme.secondary.withOpacity(0.2),
-                    ],
-                  ),
-                ),
-                splashFactory: NoSplash.splashFactory,
-                overlayColor: WidgetStateProperty.all(Colors.transparent),
-                labelStyle: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.3,
-                ),
-                unselectedLabelStyle: theme.textTheme.titleSmall,
-                labelColor: theme.colorScheme.primary,
-                unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.7),
-                tabs: [
-                  _buildAnimatedTab(l10n.musics, Icons.music_note_rounded, 0),
-                  _buildAnimatedTab(l10n.albums, Icons.album_rounded, 1),
-                  _buildAnimatedTab(l10n.favorites, Icons.favorite_rounded, 2),
-                  _buildAnimatedTab(l10n.playlists, Icons.queue_music_rounded, 3),
-                ],
+              splashFactory: NoSplash.splashFactory,
+              overlayColor: WidgetStateProperty.all(Colors.transparent),
+              labelStyle: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.3,
               ),
-            ],
+              unselectedLabelStyle: theme.textTheme.titleSmall,
+              labelColor: theme.colorScheme.primary,
+              unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              tabs: [
+                _buildAnimatedTab(l10n.musics, Icons.music_note_rounded, 0),
+                _buildAnimatedTab(l10n.albums, Icons.album_rounded, 1),
+                _buildAnimatedTab(l10n.favorites, Icons.favorite_rounded, 2),
+                _buildAnimatedTab(l10n.playlists, Icons.queue_music_rounded, 3),
+              ],
+            ),
           ),
         ),
       ),

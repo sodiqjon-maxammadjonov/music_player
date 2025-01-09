@@ -2,50 +2,83 @@ part of 'music_bloc.dart';
 
 @immutable
 abstract class MusicEvent extends Equatable {
+  const MusicEvent();
+
   @override
   List<Object?> get props => [];
 }
 
-class LoadSongs extends MusicEvent {}
+class LoadSongs extends MusicEvent {
+  const LoadSongs();
+}
 
 class PlaySong extends MusicEvent {
   final SongModel song;
-  PlaySong(this.song);
+
+  const PlaySong({required this.song});
 
   @override
   List<Object?> get props => [song];
 }
 
-class PauseSong extends MusicEvent {}
+class PauseSong extends MusicEvent {
+  const PauseSong();
+}
 
-class ResumeSong extends MusicEvent {}
+class ResumeSong extends MusicEvent {
+  const ResumeSong();
+}
 
 class DeleteSong extends MusicEvent {
   final SongModel song;
-  DeleteSong(this.song);
+
+  const DeleteSong({required this.song});
 
   @override
   List<Object?> get props => [song];
+}
+
+class UpdatePosition extends MusicEvent {
+  final Duration position;
+  final Duration duration;
+
+  const UpdatePosition({
+    required this.position,
+    required this.duration,
+  });
+
+  @override
+  List<Object?> get props => [position, duration];
 }
 
 class EditSong extends MusicEvent {
   final SongModel song;
   final String newTitle;
-  final String newArtist;
 
-  EditSong(this.song, {
+  const EditSong({
+    required this.song,
     required this.newTitle,
-    required this.newArtist,
   });
 
   @override
-  List<Object?> get props => [song, newTitle, newArtist];
+  List<Object?> get props => [song, newTitle];
 }
 
-class UpdatePosition extends MusicEvent {
+class SeekTo extends MusicEvent {
   final Duration position;
-  UpdatePosition(this.position);
+
+  const SeekTo({required this.position});
 
   @override
   List<Object?> get props => [position];
+}
+
+
+class ShareSong extends MusicEvent {
+  final SongModel song;
+
+  const ShareSong({required this.song});
+
+  @override
+  List<Object?> get props => [song];
 }

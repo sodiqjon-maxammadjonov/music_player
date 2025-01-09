@@ -9,7 +9,7 @@ class MusicState extends Equatable {
   final MusicPlayerStatus status;
   final SongModel? currentSong;
   final String? errorMessage;
-  final String? successMessage; // Yangi qo'shildi
+  final String? successMessage;
   final Duration position;
   final Duration duration;
 
@@ -18,7 +18,7 @@ class MusicState extends Equatable {
     this.status = MusicPlayerStatus.initial,
     this.currentSong,
     this.errorMessage,
-    this.successMessage, // Yangi qo'shildi
+    this.successMessage,
     this.position = Duration.zero,
     this.duration = Duration.zero,
   });
@@ -28,7 +28,7 @@ class MusicState extends Equatable {
     MusicPlayerStatus? status,
     SongModel? currentSong,
     String? errorMessage,
-    String? successMessage, // Yangi qo'shildi
+    String? successMessage,
     Duration? position,
     Duration? duration,
   }) {
