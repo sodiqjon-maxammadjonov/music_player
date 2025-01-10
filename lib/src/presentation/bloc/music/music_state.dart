@@ -1,8 +1,7 @@
 part of 'music_bloc.dart';
 
 @immutable
-enum MusicPlayerStatus { initial, loading, loaded, playing, paused, error }
-
+enum MusicPlayerStatus { initial, loading, loaded, playing, paused, error, completed }
 
 class MusicState extends Equatable {
   final List<SongModel> songs;

@@ -26,9 +26,9 @@ class MusicBloc extends Bloc<MusicEvent, MusicState> {
       Emitter<MusicState> emit,
       ) async {
     try {
-      emit(state.copyWith(status: MusicPlayerStatus.loading));  // Loading holatini qo'shish
+      emit(state.copyWith(status: MusicPlayerStatus.loading));
       await MusicFunction(emit: emit).loadSongs();
-      emit(state.copyWith(status: MusicPlayerStatus.loaded));  // Loading tugagach, holatni yangilash
+      emit(state.copyWith(status: MusicPlayerStatus.loaded));
     } catch (e) {
       emit(state.copyWith(
         status: MusicPlayerStatus.error,
@@ -114,7 +114,7 @@ class MusicBloc extends Bloc<MusicEvent, MusicState> {
       Emitter<MusicState> emit,
       ) async {
     await MusicFunction(emit: emit).seekTo(event.position);
-    emit(state.copyWith(position: event.position));  // Update position after seeking
+    emit(state.copyWith(position: event.position));
   }
 
   FutureOr<void> onShareSong(

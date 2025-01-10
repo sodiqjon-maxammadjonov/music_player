@@ -1,16 +1,18 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:bloc/bloc.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../presentation/bloc/music/music_bloc.dart';
-import 'package:path/path.dart' as path;
 
 class MusicFunction {
   final Emitter<MusicState> emit;
+
+  MusicFunction({required this.emit});
+
   final OnAudioQuery _audioQuery = OnAudioQuery();
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioPlayer player = AudioPlayer();
 
   List<SongModel> songs = [];
   SongModel? currentSong;
@@ -18,62 +20,45 @@ class MusicFunction {
   Duration duration = Duration.zero;
   bool _isDisposed = false;
 
-  MusicFunction({required this.emit}) {
-    _initializeListeners();
-  }
-
-  void _initializeListeners() {
-    _audioPlayer.positionStream.listen((newPosition) async {
-      position = newPosition;
+  void initializeListeners() {
+    player.onDurationChanged.listen((Duration d) {
       if (!_isDisposed) {
-        _emitCurrentState(
-          status: _audioPlayer.playing
-              ? MusicPlayerStatus.playing
-              : MusicPlayerStatus.paused,
-        );
+        duration = d;
+        emit(MusicState(
+          status: MusicPlayerStatus.playing,
+          duration: duration,
+          position: position,
+        ));
       }
     });
-
-    _audioPlayer.durationStream.listen((newDuration) {
-      duration = newDuration ?? Duration.zero;
+    player.onPositionChanged.listen((Duration p) {
       if (!_isDisposed) {
-        _emitCurrentState();
+        position = p;
+        emit(MusicState(
+          status: MusicPlayerStatus.playing,
+          duration: duration,
+          position: position,
+        ));
       }
     });
 
-    _audioPlayer.playerStateStream.listen((playerState) async {
-      if (playerState.processingState == ProcessingState.completed && !_isDisposed) {
-        await pauseSong();
-        await seekTo(Duration.zero);
+    player.onPlayerComplete.listen((_) {
+      if (!_isDisposed) {
+        position = Duration.zero;
+        emit(MusicState(
+          status: MusicPlayerStatus.completed,
+          duration: duration,
+          position: position,
+        ));
       }
     });
-  }
-
-  void _emitCurrentState({
-    MusicPlayerStatus? status,
-    String? successMessage,
-    String? errorMessage,
-  }) {
-    if (!_isDisposed) {
-      emit(MusicState(
-        songs: songs,
-        status: status ?? (currentSong == null
-            ? MusicPlayerStatus.loaded
-            : (_audioPlayer.playing ? MusicPlayerStatus.playing : MusicPlayerStatus.paused)),
-        currentSong: currentSong,
-        position: position,
-        duration: duration,
-        successMessage: successMessage,
-        errorMessage: errorMessage,
-      ));
-    }
   }
 
   Future<void> loadSongs() async {
     if (_isDisposed) return;
 
     try {
-      _emitCurrentState(status: MusicPlayerStatus.loading);
+      emit(MusicState(status: MusicPlayerStatus.loading));
 
       final permissionStatus = await _audioQuery.permissionsStatus();
       if (!permissionStatus) {
@@ -98,16 +83,17 @@ class MusicFunction {
             song.duration! > 0;
       }).toList();
 
-      _emitCurrentState(
+      emit(MusicState(
         status: MusicPlayerStatus.loaded,
+        songs: songs,
         successMessage: 'Qo\'shiqlar muvaffaqiyatli yuklandi',
-      );
+      ));
     } catch (e) {
       log('Qo\'shiqlarni yuklashda xatolik: ${e.toString()}');
-      _emitCurrentState(
+      emit(MusicState(
         status: MusicPlayerStatus.error,
         errorMessage: 'Qo\'shiqlarni yuklashda xatolik: ${e.toString()}',
-      );
+      ));
     }
   }
 
@@ -115,41 +101,47 @@ class MusicFunction {
     if (_isDisposed) return;
 
     try {
-      _emitCurrentState(status: MusicPlayerStatus.loading);
-
-      final file = File(song.data);
-      if (!await file.exists()) {
-        throw Exception('Audio fayl topilmadi');
+      if (song.uri != null) {
+        currentSong = song;
+        await player.play(DeviceFileSource(song.uri!));
+        emit(MusicState(
+          status: MusicPlayerStatus.playing,
+          currentSong: song,
+          duration: duration,
+          position: position,
+        ));
+      } else {
+        throw Exception('Qo\'shiq URI mavjud emas');
       }
-
-      if (currentSong?.id == song.id && _audioPlayer.playing) {
-        await pauseSong();
-        return;
-      }
-
-      // Agar boshqa qo'shiq ijro etilayotgan bo'lsa, avval to'xtatamiz
-      if (_audioPlayer.playing) {
-        await _audioPlayer.stop();
-      }
-
-      await _audioPlayer.setAudioSource(
-        AudioSource.uri(Uri.parse(song.data)),
-        preload: true,
-      );
-
-      currentSong = song;
-      await _audioPlayer.play();
-
-      _emitCurrentState(
-        status: MusicPlayerStatus.playing,
-        successMessage: 'Ijro etilmoqda: ${song.title}',
-      );
     } catch (e) {
       log('Qo\'shiqni ijro etishda xatolik: ${e.toString()}');
-      _emitCurrentState(
+      emit(MusicState(
         status: MusicPlayerStatus.error,
         errorMessage: 'Qo\'shiqni ijro etishda xatolik: ${e.toString()}',
-      );
+      ));
+    }
+  }
+
+  Future<void> deleteSong(SongModel song) async {
+    try {
+      final file = File(song.data);
+      if (await file.exists()) {
+        await file.delete();
+        songs.remove(song);
+        emit(MusicState(
+          status: MusicPlayerStatus.loaded,
+          songs: songs,
+          successMessage: 'Qo\'shiq o\'chirildi',
+        ));
+      } else {
+        throw Exception('Fayl topilmadi');
+      }
+    } catch (e) {
+      log('Qo\'shiqni o\'chirishda xatolik: ${e.toString()}');
+      emit(MusicState(
+        status: MusicPlayerStatus.error,
+        errorMessage: 'Qo\'shiqni o\'chirishda xatolik: ${e.toString()}',
+      ));
     }
   }
 
@@ -157,14 +149,19 @@ class MusicFunction {
     if (_isDisposed) return;
 
     try {
-      await _audioPlayer.pause();
-      _emitCurrentState(status: MusicPlayerStatus.paused);
+      await player.pause();
+      emit(MusicState(
+        status: MusicPlayerStatus.paused,
+        currentSong: currentSong,
+        duration: duration,
+        position: position,
+      ));
     } catch (e) {
       log('Qo\'shiqni to\'xtatishda xatolik: ${e.toString()}');
-      _emitCurrentState(
+      emit(MusicState(
         status: MusicPlayerStatus.error,
         errorMessage: 'Qo\'shiqni to\'xtatishda xatolik: ${e.toString()}',
-      );
+      ));
     }
   }
 
@@ -172,144 +169,88 @@ class MusicFunction {
     if (_isDisposed) return;
 
     try {
-      if (currentSong == null) {
-        throw Exception('Hozirda hech qanday qo\'shiq tanlanmagan');
-      }
-      await _audioPlayer.play();
-      _emitCurrentState(status: MusicPlayerStatus.playing);
+      await player.resume();
+      emit(MusicState(
+        status: MusicPlayerStatus.playing,
+        currentSong: currentSong,
+        duration: duration,
+        position: position,
+      ));
     } catch (e) {
       log('Qo\'shiqni davom ettirishda xatolik: ${e.toString()}');
-      _emitCurrentState(
+      emit(MusicState(
         status: MusicPlayerStatus.error,
         errorMessage: 'Qo\'shiqni davom ettirishda xatolik: ${e.toString()}',
-      );
-    }
-  }
-
-  Future<void> deleteSong(SongModel song) async {
-    if (_isDisposed) return;
-
-    try {
-      _emitCurrentState(status: MusicPlayerStatus.loading);
-
-      final file = File(song.data);
-      if (currentSong?.id == song.id) {
-        await _audioPlayer.stop();
-        currentSong = null;
-      }
-
-      if (await file.exists()) {
-        await file.delete();
-        songs.removeWhere((s) => s.id == song.id);
-        await _audioQuery.scanMedia(file.path);
-      }
-
-      _emitCurrentState(
-        status: MusicPlayerStatus.loaded,
-        successMessage: 'Qo\'shiq muvaffaqiyatli o\'chirildi',
-      );
-    } catch (e) {
-      log('Qo\'shiqni o\'chirishda xatolik: ${e.toString()}');
-      _emitCurrentState(
-        status: MusicPlayerStatus.error,
-        errorMessage: 'Qo\'shiqni o\'chirishda xatolik: ${e.toString()}',
-      );
-    }
-  }
-
-  Future<void> shareSong(SongModel song) async {
-    if (_isDisposed) return;
-
-    try {
-      final file = File(song.data);
-      if (!await file.exists()) {
-        throw Exception('Audio fayl topilmadi');
-      }
-
-      await Share.shareXFiles(
-        [XFile(song.data)],
-        text: 'Bu qo\'shiqni tinglang: ${song.title}',
-      );
-
-      _emitCurrentState(
-        successMessage: 'Qo\'shiq muvaffaqiyatli ulashildi',
-      );
-    } catch (e) {
-      log('Qo\'shiqni ulashishda xatolik: ${e.toString()}');
-      _emitCurrentState(
-        status: MusicPlayerStatus.error,
-        errorMessage: 'Qo\'shiqni ulashishda xatolik: ${e.toString()}',
-      );
-    }
-  }
-
-  Future<void> seekTo(Duration newPosition) async {
-    if (_isDisposed) return;
-
-    try {
-      await _audioPlayer.seek(newPosition);
-      position = newPosition;
-      _emitCurrentState();
-    } catch (e) {
-      log('Pozitsiyani o\'zgartirishda xatolik: ${e.toString()}');
-      _emitCurrentState(
-        status: MusicPlayerStatus.error,
-        errorMessage: 'Pozitsiyani o\'zgartirishda xatolik: ${e.toString()}',
-      );
+      ));
     }
   }
 
   Future<void> editSong(SongModel song, String newTitle) async {
-    if (_isDisposed) return;
-
     try {
-      _emitCurrentState(status: MusicPlayerStatus.loading);
+      final oldFile = File(song.data);
+      if (await oldFile.exists()) {
+        final directory = oldFile.parent;
+        final newPath = '${directory.path}/$newTitle.mp3';
+        await oldFile.rename(newPath);
 
-      final file = File(song.data);
-      if (!await file.exists()) {
-        throw Exception('Audio fayl topilmadi');
+        await loadSongs();
+
+        emit(MusicState(
+          status: MusicPlayerStatus.loaded,
+          songs: songs,
+          successMessage: 'Qo\'shiq nomi o\'zgartirildi',
+        ));
+      } else {
+        throw Exception('Fayl topilmadi');
       }
-
-      // Yangi nom yaroqli ekanligini tekshirish
-      if (newTitle.trim().isEmpty) {
-        throw Exception('Yangi nom bo\'sh bo\'lishi mumkin emas');
-      }
-
-      final directory = file.parent;
-      final extension = path.extension(file.path);
-      final newPath = path.join(directory.path, '$newTitle$extension');
-
-      // Agar yangi nom bilan fayl mavjud bo'lsa
-      if (await File(newPath).exists()) {
-        throw Exception('Bu nom bilan fayl allaqachon mavjud');
-      }
-
-      // Agar hozirgi qo'shiq ijro etilayotgan bo'lsa, to'xtatamiz
-      if (currentSong?.id == song.id && _audioPlayer.playing) {
-        await pauseSong();
-      }
-
-      await file.rename(newPath);
-      await _audioQuery.scanMedia(newPath);
-
-      // Qo'shiqlar ro'yxatini yangilash
-      await loadSongs();
-
-      _emitCurrentState(
-        status: MusicPlayerStatus.loaded,
-        successMessage: 'Qo\'shiq nomi muvaffaqiyatli o\'zgartirildi',
-      );
     } catch (e) {
       log('Qo\'shiq nomini o\'zgartirishda xatolik: ${e.toString()}');
-      _emitCurrentState(
+      emit(MusicState(
         status: MusicPlayerStatus.error,
-        errorMessage: 'Qo\'shiq nomini o\'zgartirishda xatolik: ${e.toString()}',
-      );
+        errorMessage:
+            'Qo\'shiq nomini o\'zgartirishda xatolik: ${e.toString()}',
+      ));
     }
   }
 
-  Future<void> dispose() async {
+  Future<void> seekTo(Duration position) async {
+    if (_isDisposed) return;
+
+    try {
+      await player.seek(position);
+      this.position = position;
+      emit(MusicState(
+        status: MusicPlayerStatus.playing,
+        currentSong: currentSong,
+        duration: duration,
+        position: position,
+      ));
+    } catch (e) {
+      log('Qo\'shiq pozitsiyasini o\'zgartirishda xatolik: ${e.toString()}');
+      emit(MusicState(
+        status: MusicPlayerStatus.error,
+        errorMessage:
+            'Qo\'shiq pozitsiyasini o\'zgartirishda xatolik: ${e.toString()}',
+      ));
+    }
+  }
+
+  Future<void> shareSong(SongModel song) async {
+    try {
+      final file = File(song.data);
+      if (await file.exists()) {
+        await Share.shareXFiles([XFile(song.data)], text: 'Test');
+      }
+    } catch (e) {
+      emit(MusicState(
+        status: MusicPlayerStatus.error,
+        errorMessage: 'Qo\'shiqni ulashishda xatolik: ${e.toString()}',
+      ));
+    }
+  }
+
+  void dispose() {
     _isDisposed = true;
-    await _audioPlayer.dispose();
+    player.dispose();
   }
 }
