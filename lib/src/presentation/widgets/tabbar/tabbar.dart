@@ -17,7 +17,6 @@ class CustomTabBar extends StatefulWidget {
 
 class _CustomTabBarState extends State<CustomTabBar> {
   late ScrollController _scrollController;
-  double _currentScrollOffset = 0;
 
   @override
   void initState() {
@@ -54,7 +53,7 @@ class _CustomTabBarState extends State<CustomTabBar> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     return Container(
@@ -63,7 +62,7 @@ class _CustomTabBarState extends State<CustomTabBar> {
         color: theme.scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withOpacity(0.1),
+            color: theme.shadowColor.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -73,7 +72,6 @@ class _CustomTabBarState extends State<CustomTabBar> {
         onNotification: (notification) {
           if (notification is ScrollUpdateNotification) {
             setState(() {
-              _currentScrollOffset = notification.metrics.pixels;
             });
           }
           return true;
@@ -110,7 +108,7 @@ class _CustomTabBarState extends State<CustomTabBar> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? theme.colorScheme.primary.withOpacity(0.1)
+              ? theme.colorScheme.primary.withValues(alpha: 0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
@@ -126,7 +124,7 @@ class _CustomTabBarState extends State<CustomTabBar> {
               icon,
               color: isSelected
                   ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface.withOpacity(0.6),
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
               size: 24,
             ),
             const SizedBox(width: 8),
@@ -135,7 +133,7 @@ class _CustomTabBarState extends State<CustomTabBar> {
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: isSelected
                     ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurface.withOpacity(0.6),
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
