@@ -45,5 +45,7 @@
     "yourMusicLibrary": "Sizning musiqa kutubxonangiz",
     "yourAlbums": "Sizning albomlaringiz",
     "yourPlaylists": "Sizning pleylistlaringiz",
-    "yourFavorites": "Sizning sevimlilaringiz"
+    "yourFavorites": "Sizning sevimlilaringiz",
+    "noPermission": "Xotiraga kirish ruxsati yo'q!",
+    "errorLoadSongs": "Qo'shiqlarni olishda xatolik."
 }

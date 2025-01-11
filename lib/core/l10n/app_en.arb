@@ -45,5 +45,7 @@
     "yourMusicLibrary": "Your Music Library",
     "yourAlbums": "Your Albums",
     "yourPlaylists": "Your Playlists",
-    "yourFavorites": "Your Favorites"
+    "yourFavorites": "Your Favorites",
+    "noPermission": "Storage access permission is not granted!",
+    "errorLoadSongs": "Error while fetching songs."
 }

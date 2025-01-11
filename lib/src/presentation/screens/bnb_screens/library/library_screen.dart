@@ -29,35 +29,35 @@ class _LibraryScreenState extends State<LibraryScreen>
     super.dispose();
   }
 
-  void _handleTabAnimation() {
-    setState(() {});
-  }
-
-  void _handleTabChanged(int index) {
-    context.read<LibraryBloc>().add(ChangeLibraryTab(index));
-  }
+  void _handleTabAnimation() => setState(() {});
+  void _handleTabChanged(int index) =>
+      context.read<LibraryBloc>().add(ChangeLibraryTab(index));
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
+    final tabBarWidth = size.width * 0.95;
+    final isSmallScreen = size.width < 360;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        title: PreferredSize(
-          preferredSize: const Size.fromHeight(50),
+        titleSpacing: 0,
+        title: Center(
           child: Container(
-            height: 42,
+            height: 38,
+            width: tabBarWidth,
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withValues(alpha: 0.7),
-              borderRadius: BorderRadius.circular(16),
+              color: theme.colorScheme.surface.withOpacity(0.7),
+              borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  blurRadius: 12,
+                  color: theme.colorScheme.primary.withOpacity(0.08),
+                  blurRadius: 8,
                   offset: const Offset(0, 0),
                 ),
               ],
@@ -67,29 +67,34 @@ class _LibraryScreenState extends State<LibraryScreen>
               isScrollable: true,
               onTap: _handleTabChanged,
               dividerColor: Colors.transparent,
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
               indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(8),
                 gradient: LinearGradient(
                   colors: [
-                    theme.colorScheme.primary.withValues(alpha: 0.2),
-                    theme.colorScheme.secondary.withValues(alpha: 0.2),
+                    theme.colorScheme.primary.withOpacity(0.15),
+                    theme.colorScheme.secondary.withOpacity(0.15),
                   ],
                 ),
               ),
               splashFactory: NoSplash.splashFactory,
-              overlayColor: WidgetStateProperty.all(Colors.transparent),
-              labelStyle: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.3,
+              overlayColor: MaterialStateProperty.all(Colors.transparent),
+              labelStyle: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w500,
+                fontSize: isSmallScreen ? 10 : 11,
+                letterSpacing: 0,
               ),
-              unselectedLabelStyle: theme.textTheme.titleSmall,
+              unselectedLabelStyle: theme.textTheme.labelSmall?.copyWith(
+                fontSize: isSmallScreen ? 10 : 11,
+                letterSpacing: 0,
+              ),
               labelColor: theme.colorScheme.primary,
-              unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.6),
               tabs: [
-                _buildAnimatedTab(l10n.musics, Icons.music_note_rounded, 0),
-                _buildAnimatedTab(l10n.albums, Icons.album_rounded, 1),
-                _buildAnimatedTab(l10n.favorites, Icons.favorite_rounded, 2),
-                _buildAnimatedTab(l10n.playlists, Icons.queue_music_rounded, 3),
+                _buildTab(l10n.musics, Icons.music_note_rounded, 0),
+                _buildTab(l10n.albums, Icons.album_rounded, 1),
+                _buildTab(l10n.favorites, Icons.favorite_rounded, 2),
+                _buildTab(l10n.playlists, Icons.queue_music_rounded, 3),
               ],
             ),
           ),
@@ -107,27 +112,22 @@ class _LibraryScreenState extends State<LibraryScreen>
     );
   }
 
-  Widget _buildAnimatedTab(String text, IconData icon, int index) {
+  Widget _buildTab(String text, IconData icon, int index) {
     final isSelected = _tabController.index == index;
-    final animationValue =
-        (_tabController.animation?.value ?? 0) - index;
-    final isAnimating = animationValue.abs() < 1;
-    final scale = isAnimating
-        ? 1.0 + (0.2 * (1 - (animationValue.abs())))
-        : isSelected ? 1.2 : 1.0;
+    final scale = isSelected ? 1.05 : 1.0;
 
     return Tab(
-      height: 40,
+      height: 34,
       child: AnimatedScale(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 150),
         scale: scale,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 6),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 20),
-              const SizedBox(width: 8),
+              Icon(icon, size: 16),
+              const SizedBox(width: 4),
               Text(text),
             ],
           ),
@@ -140,7 +140,7 @@ class _LibraryScreenState extends State<LibraryScreen>
     return Center(
       child: Text(
         text,
-        style: theme.textTheme.bodyLarge?.copyWith(
+        style: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
         ),
       ),

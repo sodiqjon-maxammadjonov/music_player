@@ -45,5 +45,7 @@
     "yourMusicLibrary": "Ваша музыкальная библиотека",
     "yorAlbums": "Ваши альбомы",
     "yourPlaylists": "Ваши плейлисты",
-    "yourFavorites": "Ваше избранное"
+    "yourFavorites": "Ваше избранное",
+    "noPermission": "Разрешение на доступ к хранилищу не предоставлено!",
+    "errorLoadSongs": "Ошибка при получении песен."
 }
