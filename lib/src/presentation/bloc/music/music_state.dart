@@ -5,8 +5,6 @@ sealed class MusicState {}
 
 sealed class MusicActionState {}
 
-final class MusicInitial extends MusicState {}
-
 final class MusicLoadedState extends MusicState {
   final List<Song> song;
   MusicLoadedState({required this.song});

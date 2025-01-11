@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/constants/const_values.dart';
 import '../bloc/exit/exit_bloc.dart';
+import '../bloc/music/music_bloc.dart';
 import '../bloc/navigation/navigation_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../widgets/snackbar/snackbar.dart';
@@ -10,8 +11,20 @@ import 'bnb_screens/home/home_screen.dart';
 import 'bnb_screens/library/library_screen.dart';
 import 'drawer/main_drawer.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  @override
+  void initState() {
+    // Ilova ochilishida bir marta musiqalarni yuklaymiz
+    context.read<MusicBloc>().add(MusicLoadEvent(context: context));
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

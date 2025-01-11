@@ -18,6 +18,7 @@ class MusicFunctions {
   static final PlaylistService _db = PlaylistService();
 
   Future<List<Song>> getFromStorage() async {
+    print("Loading musics");
     final l10n = AppLocalizations.of(context);
     try {
       bool hasPermission = await requestStoragePermission();

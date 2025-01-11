@@ -10,7 +10,7 @@ part 'music_event.dart';
 part 'music_state.dart';
 
 class MusicBloc extends Bloc<MusicEvent, MusicState> {
-  MusicBloc() : super(MusicInitial()) {
+  MusicBloc() : super(MusicEmptyState()) {
     on<MusicLoadEvent>(musicLoadEvent);
     on<MusicPlayPauseEvent>(musicPlayPauseEvent);
   }

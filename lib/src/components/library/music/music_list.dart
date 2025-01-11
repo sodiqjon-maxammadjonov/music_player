@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:music_player/src/data/model/music_model.dart';
 import 'package:music_player/src/presentation/widgets/music/music_list_widget.dart';
+
+import 'full_screen_player.dart';
+
 class MusicList extends StatelessWidget {
   final List<Song> song;
-  
+
   const MusicList({super.key, required this.song});
 
   @override
@@ -15,7 +18,16 @@ class MusicList extends StatelessWidget {
       child: ListView.builder(
         itemCount: song.length,
         itemBuilder: (context, index) {
-          return MusicListWidget(song: song[index], onTap: () {});
+          return MusicListWidget(
+              song: song[index],
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FullScreenPlayer(song: song[index]),
+                  ),
+                );
+              });
         },
       ),
     );
